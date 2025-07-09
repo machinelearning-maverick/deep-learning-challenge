@@ -1,2 +1,2 @@
 # deep-learning-challenge
-First Code, Then Understand - 30-Day Deep Learning Coding Challenge
+30-day challenge: First code, then understand — Deep Learning with PyTorch, TensorFlow, NumPy
