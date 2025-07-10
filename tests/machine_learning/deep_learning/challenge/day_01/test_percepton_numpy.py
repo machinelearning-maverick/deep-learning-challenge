@@ -1,6 +1,6 @@
 import numpy as np
 
-from machine_learning.deep_learning.challenge.day_01 import (
+from deep_learning_challenge.machine_learning.deep_learning.challenge.day_01.perceptron_numpy import (
     step,
     predict,
     train_perceptron,
@@ -18,10 +18,10 @@ def test_predict():
     w = np.array([0.5, 0.5])
 
     b = -1
-    assert predict(x, w, b) == 0
-
-    b = -0.5
     assert predict(x, w, b) == 1
+
+    b = -1.5
+    assert predict(x, w, b) == 0
 
 
 def test_train_on_and_gate():
