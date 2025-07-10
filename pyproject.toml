@@ -1,9 +1,13 @@
+[build-system]
+requires = ["setuptools>=67.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "deep-learning-challenge"
 version = "0.1.0"
 description = "30-day challenge: First code, then understand — Deep Learning with PyTorch, TensorFlow, NumPy"
 authors = [
-    { name="Machine Learning Maverick", email="github@machinelearningmaverick.com" }
+    { name = "Machine Learning Maverick", email = "github@machinelearningmaverick.com" },
 ]
 license = "MIT"
 requires-python = ">=3.10"
@@ -12,21 +16,18 @@ dependencies = [
     "numpy>=1.24",
     "torch>=2.1",
     "tensorflow>=2.14",
-    "matplotlib>=3.8"
+    "matplotlib>=3.8",
 ]
 
-[project.optional-dependencies]
-dev = [
-    "pytest>=7.4",
-    "ipykernel>=6.29"
-]
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["deep_learning_challenge*"]
 
 [tool.pytest.ini_options]
-minversion = "7.0"
-addopts = "-ra -q"
-testpaths = ["tests", "."]
-python_files = ["test_*.py"]
+testpaths = ["tests"]
+addopts = "-s -q --disable-warnings --strict-markers --log-cli-level=INFO"
+log_cli = true
+log_cli_level = "DEBUG"
 
-[build-system]
-requires = ["setuptools>=67.0"]
-build-backend = "setuptools.build_meta"
+[project.optional-dependencies]
+dev = ["pytest>=7.4", "ipykernel>=6.29"]
