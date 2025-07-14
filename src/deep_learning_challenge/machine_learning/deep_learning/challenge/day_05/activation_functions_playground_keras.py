@@ -3,18 +3,21 @@ import matplotlib.pyplot as plt
 from tensorflow.keras import backend as K
 
 
-def plot_activations_keras():
-    # Input values
-    x = np.linspace(-5, 5, 200)
-
+def get_activations_keras(x_vector = np.linspace(-3, 3, 200)):
     # Activation functions
     activations = {
-        "ReLU": K.eval(K.relu(x)),
-        "Sigmoid": K.eval(K.sigmoid(x)),
-        "Tanh": K.eval(K.tanh(x)),
-        "LeakyReLU": K.eval(K.relu(x, alpha=0.1)),  # aplha == negative slop
-        "Softplus": K.eval(K.softplus(x)),
+        "ReLU": K.eval(K.relu(x_vector)),
+        "Sigmoid": K.eval(K.sigmoid(x_vector)),
+        "Tanh": K.eval(K.tanh(x_vector)),
+        "LeakyReLU": K.eval(K.relu(x_vector, alpha=0.1)),  # aplha == negative slop
+        "Softplus": K.eval(K.softplus(x_vector)),
     }
+
+    return x_vector, {k: v for k, v in activations.items()}
+
+
+def plot_activations_keras():
+    x, activations = get_activations_keras()
 
     # Plot
     plt.figure(figsize=(10, 6))
