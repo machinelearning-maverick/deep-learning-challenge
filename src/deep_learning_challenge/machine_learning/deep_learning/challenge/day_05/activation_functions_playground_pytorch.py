@@ -2,6 +2,7 @@ import torch
 import torch.nn.functional as F
 
 import matplotlib
+
 matplotlib.use("TkAgg")
 import matplotlib.pyplot as plt
 import numpy as np
@@ -23,6 +24,8 @@ activations = {
 plt.figure(figsize=(10, 6))
 for name, y in activations.items():
     plt.plot(x.numpy(), y.numpy(), label=name)
+
+plt.plot(x.numpy(), y.numpy(), label="x (raw input)", linestyle="--", color="gray")
 
 plt.title("Activation Functions (PyTorch)")
 plt.xlabel("x")
