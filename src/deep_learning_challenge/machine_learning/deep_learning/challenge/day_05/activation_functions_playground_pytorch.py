@@ -1,11 +1,7 @@
 import torch
 import torch.nn.functional as F
 
-import matplotlib
-
-matplotlib.use("TkAgg")
 import matplotlib.pyplot as plt
-import numpy as np
 
 # Input values
 x = torch.linspace(-5, 5, 200)
@@ -33,6 +29,6 @@ plt.ylabel("activation(x)")
 plt.legend()
 plt.grid(True)
 
-plt.savefig("activation_functions_playground.png")
+# plt.savefig("activation_functions_playground.png")
 
 plt.show()
