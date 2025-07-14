@@ -21,7 +21,7 @@ plt.figure(figsize=(10, 6))
 for name, y in activations.items():
     plt.plot(x.numpy(), y.numpy(), label=name)
 
-plt.plot(x.numpy(), y.numpy(), label="x (raw input)", linestyle="--", color="gray")
+plt.plot(x.numpy(), x.numpy(), label="x (raw input)", linestyle="--", color="gray")
 
 plt.title("Activation Functions (PyTorch)")
 plt.xlabel("x")
@@ -29,6 +29,6 @@ plt.ylabel("activation(x)")
 plt.legend()
 plt.grid(True)
 
-# plt.savefig("activation_functions_playground.png")
+# plt.savefig("activation_functions_playground_pytorch.png")
 
 plt.show()
