@@ -4,11 +4,11 @@ import torch.nn as nn
 
 def pytorch_shape_debug(batch_size=4, input_dim=3):
     # Dummy input: batch of samples 4, 3 features each
-    x = torch.randn(4, 3)
+    x = torch.randn(batch_size, input_dim)
 
     # Define a simple Multi-Layer Perceptron
     model = nn.Sequential(
-        nn.Linear(3, 5),  # input: 3 features; output: 5 neurons
+        nn.Linear(input_dim, 5),  # input: 3 features; output: 5 neurons
         nn.ReLU(),
         nn.Linear(5, 2),  # input: 5 neurons; output: 2 classes
     )
