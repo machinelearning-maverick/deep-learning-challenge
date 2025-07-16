@@ -1,7 +1,7 @@
 import numpy as np
 
 from deep_learning_challenge.machine_learning.deep_learning.challenge.day_07.loss_functions_from_scratch_numpy_mse_bce import (
-    mse,
+    mse, bce
 )
 
 
@@ -20,3 +20,20 @@ def test_mse():
     assert mse_small < 0.2
     assert mse_large > 12
     assert mse_small < mse_large, "Good predictions should yield lower loss"
+
+
+def test_bce():
+    # spam detection
+    y_true = np.array([1, 0, 1, 0])
+
+    # spam detection good enough
+    y_pred_good = np.array([0.95, 0.1, 0.87, 0.2])
+    # spam detection not good
+    y_pred_bad = np.array([0.1, 0.8, 0.2, 0.7])
+
+    bce_good = bce(y_true, y_pred_good)
+    bce_bad = bce(y_true, y_pred_bad)
+
+    assert bce_good < 0.2
+    assert bce_bad > 1.0
+    assert bce_good < bce_bad, "Good predictions should yield lower BCE"
