@@ -46,5 +46,33 @@ def bce_mse_plot():
     plt.show()
 
 
+def gradients_bce_mse_plot():
+    p = np.linspace(0.01, 0.99, 100)
+
+    # Ground truth y = 1
+    y_true = 1
+
+    # Gradients
+    grad_mse = 2 * (p - y_true)
+    grad_bce = (p - y_true) / (p * (1 - p))
+
+    plt.figure(figsize=(8, 5))
+    plt.plot(p, grad_mse, label="∂MSE/∂ŷ (y=1)")
+    plt.plot(p, grad_bce, label="∂BCE/∂ŷ (y=1)")
+    plt.title("Gradient of MSE vs BCE when y=1")
+    plt.xlabel("ŷ (Predicted Probability)")
+    plt.ylabel("Gradient")
+    plt.axhline(0, color="black", linestyle="--")
+    plt.legend()
+
+    plt.grid(True)
+    plt.savefig("gradients_bce_mse_plot.png")
+    plt.show()
+
+    def manual_training_loop_using_erivatives():
+        pass
+
+
 if __name__ == "__main__":
     bce_mse_plot()
+    gradients_bce_mse_plot()
