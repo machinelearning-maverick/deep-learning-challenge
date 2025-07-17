@@ -7,3 +7,11 @@ def bce_loss_keras(y_true, y_pred):
 
     print(f"Keras BinaryCrossentropy: {loss}")
     return loss
+
+
+def cce_loss_keras(y_true, y_pred):
+    loss_fn = tf.keras.losses.CategoricalCrossentropy()
+    loss = loss_fn(y_true, y_pred).numpy()
+
+    print(f"Keras CategoricalCrossentropy: {loss}")
+    return loss
