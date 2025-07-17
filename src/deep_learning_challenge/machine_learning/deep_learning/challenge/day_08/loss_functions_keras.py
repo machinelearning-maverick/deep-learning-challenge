@@ -15,3 +15,12 @@ def cce_loss_keras(y_true, y_pred):
 
     print(f"Keras CategoricalCrossentropy: {loss}")
     return loss
+
+
+def scce_loss_keras(y_true, y_pred):
+    """Loss function with class indices"""
+    loss_fn = tf.keras.losses.SparseCategoricalCrossentropy()
+    loss = loss_fn(y_true, y_pred).numpy()
+
+    print(f"Keras SparseCategoricalCrossentropy: {loss}")
+    return loss
