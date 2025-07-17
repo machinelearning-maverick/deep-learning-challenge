@@ -1,6 +1,6 @@
 import torch
 
-from deep_learning_challenge.machine_learning.deep_learning.challenge.day_08.loss_functions_pytorch_keras import (
+from deep_learning_challenge.machine_learning.deep_learning.challenge.day_08.loss_functions_pytorch import (
     bce_loss_pytorch,
     bce_logits_loss_pytorch,
     ce_logits_loss_pytorch,
