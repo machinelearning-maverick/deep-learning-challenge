@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 
 from sklearn.datasets import make_classification
 from sklearn.preprocessing import OneHotEncoder
@@ -52,6 +53,7 @@ for epoch in range(epochs):
     z = np.dot(X, W) + b
     y_pred = softmax(z)
 
+    # Track loss over time
     loss = cross_entropy(y_onehot, y_pred)
     acc = np.mean(np.argmax(y_pred, axis=1) == y)
 
@@ -64,7 +66,40 @@ for epoch in range(epochs):
     W -= lr * grad_W
     b -= lr * grad_b
 
-    
+    # Track loss over time
+    loss_history.append(loss)
+    acc_history.append(acc)
 
     if epoch % 50 == 0:
         print(f"Epoch {epoch} | Loss: {loss:.4f} | Acc: {acc:.4f}")
+
+
+## Step 5: Test predictions (accuracy check)
+y_pred_final = softmax(np.dot(X, W) + b)
+y_pred_labels = np.argmax(y_pred_final, axis=1)
+acc_final = np.mean(y_pred_labels == y)
+print(f"Final test accuracy (NumPy model): {acc_final:.4f}")
+
+
+## Step 6: Plot loss over time
+plt.figure(figsize=(10, 4))
+
+# Loss plot
+plt.subplot(1, 2, 1)
+plt.plot(loss_history, label="Loss")
+plt.title("Loss over Epochs")
+plt.xlabel("Epoch")
+plt.ylabel("Loss")
+plt.grid(True)
+
+# Accuracy plot (with final value)
+plt.subplot(1, 2, 2)
+plt.plot(acc_history, label="Accuracy", color="green")
+plt.title(f"Accuracy over Epochs (Final: {acc_final:.2%})")
+plt.xlabel("Epoch")
+plt.ylabel("Accuracy")
+plt.grid(True)
+
+plt.tight_layout()
+plt.savefig("loss_over_epochs_v2.png")
+plt.show()
