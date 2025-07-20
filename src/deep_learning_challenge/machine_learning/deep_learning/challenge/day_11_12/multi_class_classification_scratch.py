@@ -39,3 +39,32 @@ def cross_entropy(y_true, y_pred):
     eps = 1e-15
     y_pred = np.clip(y_pred, eps, 1 - eps)
     return -np.mean(np.sum(y_true * np.log(y_pred), axis=1))
+
+
+## Step 4: Training loop
+lr = 0.1
+epochs = 500
+
+loss_history = []
+acc_history = []
+
+for epoch in range(epochs):
+    z = np.dot(X, W) + b
+    y_pred = softmax(z)
+
+    loss = cross_entropy(y_onehot, y_pred)
+    acc = np.mean(np.argmax(y_pred, axis=1) == y)
+
+    # Gradient
+    grad_z = y_pred - y_onehot
+    grad_W = np.dot(X.T, grad_z) / n_samples
+    grad_b = np.mean(grad_z, axis=0, keepdims=True)
+
+    # Update
+    W -= lr * grad_W
+    b -= lr * grad_b
+
+    
+
+    if epoch % 50 == 0:
+        print(f"Epoch {epoch} | Loss: {loss:.4f} | Acc: {acc:.4f}")
