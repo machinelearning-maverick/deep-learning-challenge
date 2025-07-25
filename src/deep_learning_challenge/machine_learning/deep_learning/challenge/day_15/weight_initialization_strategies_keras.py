@@ -50,9 +50,13 @@ def plot_impact_on_training(models_init_data):
 
     for idx, ax in enumerate(fig.axes):
         ax.plot(models_init_data[idx]["history"].history["loss"])
-        ax.set_title(
-            f"Inits: {models_init_data[idx]["initializers"]} -> Loss over epochs (Keras)"
-        )
+
+        title = "Loss over epochs (Keras) \n"
+        title += f"Initializers: {models_init_data[idx]["initializers"]} \n"
+        title += f"Final loss: {models_init_data[idx]["loss"]} \n"
+        title += f"Final acc: {models_init_data[idx]["accuracy"]} \n"
+
+        ax.set_title(title)
         ax.set(xlabel="Epoch", ylabel="Loss")
 
     plt.tight_layout()
