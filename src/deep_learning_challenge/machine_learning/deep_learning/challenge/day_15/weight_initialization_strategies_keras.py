@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense
@@ -10,25 +11,21 @@ from sklearn.datasets import make_classification
 from sklearn.preprocessing import StandardScaler
 
 
-def model_with_initialization(strategy):
-    # Prepare data
-    X, y = make_classification(
-        n_samples=500,
-        n_features=4,
-        n_classes=3,
-        n_informative=3,
-        n_redundant=0,
-        random_state=42,
-    )
-    X = StandardScaler().fit_transform(X)
-
+def model_with_initialization(X, y, strategy_hidden_layer, strategy_output_layer):
     # Define model
     model = Sequential(
         [
             Dense(
-                10, activation="relu", input_shape=(4,), kernel_initializer=HeNormal()
+                10,
+                activation="relu",
+                input_shape=(4,),
+                kernel_initializer=strategy_hidden_layer,
             ),
-            Dense(3, activation="softmax"),
+            Dense(
+                3,
+                activation="softmax",
+                kernel_initializer=strategy_output_layer,
+            ),
         ]
     )
 
@@ -41,4 +38,24 @@ def model_with_initialization(strategy):
 
     # Train
     history = model.fit(X, y, epochs=500, verbose=0)
-    pass
+    loss, accuracy = model.evaluate(X, y, verbose=0)
+
+    return history, loss, accuracy
+
+
+def plot_impact_on_training(models_init_data):
+
+    columns = len(models_init_data)
+    fig, axes = plt.subplots(nrows=1, ncols=columns, figsize=(5 * columns, 5))
+
+    for idx, ax in enumerate(fig.axes):
+        ax.plot(models_init_data[idx]["history"].history["loss"])
+        ax.set_title(
+            f"Inits: {models_init_data[idx]["initializers"]} -> Loss over epochs (Keras)"
+        )
+        ax.set(xlabel="Epoch", ylabel="Loss")
+
+    plt.tight_layout()
+
+    plt.savefig("impact-on-training_Keras-Autograd.png")
+    plt.show()
