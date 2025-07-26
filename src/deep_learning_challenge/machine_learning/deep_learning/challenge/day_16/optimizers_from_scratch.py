@@ -44,3 +44,34 @@ def cross_entroyp(y_true, y_pred):
     eps = 1e-15
     y_pred = np.clip(y_pred, eps, 1 - eps)
     return -np.mean(np.sum(y_true * np.log(y_pred), axis=1))
+
+
+# Code like in the Day 11-12 -> multi_class_classification_scratch.py
+def train_model(X, y, y_onehot, optimizer, epochs=500):
+    n_samples, n_features = X.shape
+    n_classes = y_onehot.shape[1]
+
+    # Initialize weights and biases
+    W = np.random.randn(n_features, n_classes)
+    b = np.zeros((1, n_classes))
+
+    loss_history = []
+    acc_history = []
+
+    for epoch in range(epochs):
+        z = np.dot(X, W) + b
+        y_pred = softmax(z)
+
+        loss = cross_entroyp(y_onehot, y_pred)
+        acc = np.mean(np.argmax(y_pred, axis=1) == y)
+
+        grad_z = y_pred - y_onehot
+        grad_W = np.dot(X.T, grad_z) / n_samples
+        grad_b = np.mean(grad_z, axis=0, keepdims=True)
+
+        W, b = optimizer.step(W, b, grad_W, grad_b)
+
+        loss_history.append(loss)
+        acc_history.append(acc)
+
+    return loss_history, acc_history, W, b
