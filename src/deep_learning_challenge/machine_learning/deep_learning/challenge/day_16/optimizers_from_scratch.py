@@ -33,3 +33,14 @@ class MomentumOptimizer:
         b += self.v_b
 
         return W, b
+
+
+def softmax(z):
+    exp = np.exp(z - np.max(z, axis=1, keepdims=True))
+    return exp / np.sum(exp, axis=1, keepdims=True)
+
+
+def cross_entroyp(y_true, y_pred):
+    eps = 1e-15
+    y_pred = np.clip(y_pred, eps, 1 - eps)
+    return -np.mean(np.sum(y_true * np.log(y_pred), axis=1))
