@@ -20,7 +20,7 @@ def test_train_model_with_optimizers():
         n_redundant=0,
         random_state=42,
     )
-    # X = StandardScaler().fit_transform(X)
+
     # one-hot encoded labels
     encoder = OneHotEncoder(sparse_output=False)
     y_onehot = encoder.fit_transform(y.reshape(-1, 1))
@@ -31,6 +31,14 @@ def test_train_model_with_optimizers():
     )
     plot_impact_on_training(
         loss_history_sgd, acc_history_sgd, W_sgd, b_sgd, "SGDOptimizer"
+    )
+
+    optimizer_momentum = MomentumOptimizer()
+    loss_history_mntm, acc_history_mntm, W_mntm, b_mntm = train_model(
+        X, y, y_onehot, optimizer_momentum
+    )
+    plot_impact_on_training(
+        loss_history_mntm, acc_history_mntm, W_mntm, b_mntm, "MomentumOptimizer"
     )
 
     pass

@@ -141,5 +141,5 @@ def plot_impact_on_training(
 
     plt.tight_layout()
 
-    plt.savefig("impact-on-training_optimizers-scratch.png")
+    plt.savefig(f"impact-on-training_{optimizer}-optimizer-scratch.png")
     plt.show()
