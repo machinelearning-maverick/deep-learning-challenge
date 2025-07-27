@@ -58,6 +58,8 @@ def train_model(X, y, y_onehot, optimizer, epochs=500):
 
     loss_history = []
     acc_history = []
+    W_history = []
+    b_history = []
 
     for epoch in range(epochs):
         z = np.dot(X, W) + b
@@ -75,10 +77,18 @@ def train_model(X, y, y_onehot, optimizer, epochs=500):
         loss_history.append(loss)
         acc_history.append(acc)
 
-    return loss_history, acc_history, W, b
+        W_history.append(W.copy())
+        b_history.append(b.copy())
+
+    W_history = np.array(W_history)  # shape: (epochs, in_features, out_classes)
+    b_history = np.array(b_history)  # shape: (epochs, 1, out_classes)
+
+    return loss_history, acc_history, W_history, b_history
 
 
-def plot_impact_on_training(loss_history, acc_history, weights, biases, optimizer: str):
+def plot_impact_on_training(
+    loss_history, acc_history, W_history, b_history, optimizer: str
+):
 
     fig, ((loss_ax, acc_ax), (weights_ax, biases_ax)) = plt.subplots(
         nrows=2, ncols=2, figsize=(8, 8)
@@ -92,6 +102,7 @@ def plot_impact_on_training(loss_history, acc_history, weights, biases, optimize
 
     loss_ax.set_title(loss_title)
     loss_ax.set(xlabel="Epoch", ylabel="Loss")
+    loss_ax.grid(True)
 
     ## Accuracy plot
     acc_ax.plot(acc_history)
@@ -101,24 +112,32 @@ def plot_impact_on_training(loss_history, acc_history, weights, biases, optimize
 
     acc_ax.set_title(acc_title)
     acc_ax.set(xlabel="Epoch", ylabel="Accuracy")
+    acc_ax.grid(True)
 
     ## Weights plot
-    weights_ax.plot(weights)
+    # Weight evolution (each component over time)
+    for i in range(W_history.shape[1]):        # input dim
+        for j in range(W_history.shape[2]):    # output dim
+            weights_ax.plot(W_history[:, i, j], label=f"W[{i},{j}]")
 
     weights_title = "Weights (training loop - scratch) \n"
     weights_title += f"Optimizer: {optimizer} \n"
 
     weights_ax.set_title(weights_title)
-    weights_ax.set(xlabel="", ylabel="")
+    weights_ax.set(xlabel="Epoch", ylabel="Weight")
+    weights_ax.grid(True)
 
     ## Biases plot
-    biases_ax.plot(biases)
+    # Bias evolution
+    for j in range(b_history.shape[2]):
+        biases_ax.plot(b_history[:, 0, j], label=f"b[{j}]")
 
     biases_title = "Biases (training loop - scratch) \n"
     biases_title += f"Optimizer: {optimizer} \n"
 
     biases_ax.set_title(biases_title)
-    biases_ax.set(xlabel="", ylabel="")
+    biases_ax.set(xlabel="Epoch", ylabel="Bias")
+    biases_ax.grid(True)
 
     plt.tight_layout()
 
