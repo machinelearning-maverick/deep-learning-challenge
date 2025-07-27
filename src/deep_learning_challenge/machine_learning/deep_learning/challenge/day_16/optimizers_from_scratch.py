@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 class SGDOptimizer:
@@ -75,3 +76,51 @@ def train_model(X, y, y_onehot, optimizer, epochs=500):
         acc_history.append(acc)
 
     return loss_history, acc_history, W, b
+
+
+def plot_impact_on_training(loss_history, acc_history, weights, biases, optimizer: str):
+
+    fig, ((loss_ax, acc_ax), (weights_ax, biases_ax)) = plt.subplots(
+        nrows=2, ncols=2, figsize=(8, 8)
+    )
+
+    ## Loss plot
+    loss_ax.plot(loss_history)
+
+    loss_title = "Loss over epochs (training loop - scratch) \n"
+    loss_title += f"Optimizer: {optimizer} \n"
+
+    loss_ax.set_title(loss_title)
+    loss_ax.set(xlabel="Epoch", ylabel="Loss")
+
+    ## Accuracy plot
+    acc_ax.plot(acc_history)
+
+    acc_title = "Accuracy over epochs (training loop - scratch) \n"
+    acc_title += f"Optimizer: {optimizer} \n"
+
+    acc_ax.set_title(acc_title)
+    acc_ax.set(xlabel="Epoch", ylabel="Accuracy")
+
+    ## Weights plot
+    weights_ax.plot(weights)
+
+    weights_title = "Weights (training loop - scratch) \n"
+    weights_title += f"Optimizer: {optimizer} \n"
+
+    weights_ax.set_title(weights_title)
+    weights_ax.set(xlabel="", ylabel="")
+
+    ## Biases plot
+    biases_ax.plot(biases)
+
+    biases_title = "Biases (training loop - scratch) \n"
+    biases_title += f"Optimizer: {optimizer} \n"
+
+    biases_ax.set_title(biases_title)
+    biases_ax.set(xlabel="", ylabel="")
+
+    plt.tight_layout()
+
+    plt.savefig("impact-on-training_optimizers-scratch.png")
+    plt.show()
