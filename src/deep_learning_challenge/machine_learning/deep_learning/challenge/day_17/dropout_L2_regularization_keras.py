@@ -36,17 +36,17 @@ y_test_oh = to_categorical(y_test.numpy())
 # Keras model
 model = Sequential(
     [
-        Dense(
-            64,
-            input_shape(
-                20,
-            ),
-            activation="relu",
-            kernel_regularizes=l2(1e-4),
-        ),
+        Dense(64, input_shape(20,), activation="relu", kernel_regularizes=l2(1e-4)),
         Dropout(0.5),
         Dense(32, activation="relu", kernel_regularizer=l2(1e-4)),
         Dropout(0.3),
         Dense(3, activation="softmax"),
     ]
 )
+
+model.compile(optimizer=Adam(learning_rate=0.01),
+              loss="categorical_crossentropy",
+              metrics=["accuracy"])
+
+model.fit(X_train.numpy(), y_train_oh, epochs=50, batch_size=32, verbose=1)
+model.evaluate(X_test.numpy(), y_test_oh)
