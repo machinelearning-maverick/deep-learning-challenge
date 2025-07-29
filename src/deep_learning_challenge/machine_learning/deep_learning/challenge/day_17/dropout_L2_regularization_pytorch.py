@@ -65,3 +65,32 @@ criterion = nn.CrossEntropyLoss()
 
 # L2 regularization is controlled via 'weight_decay' in the optimizer
 optimizer = optim.Adam(model.parameters(), lr=0.01, weight_decay=1e-4)
+
+
+def train_model(model, loader, optimizer, criterion, epochs=50):
+    model.train()
+    for epoch in range(epochs):
+        total_loss = 0
+        for xb, yb in loader:
+            optimizer.zero_grad()  # reset gradients
+            out = model(xb)  # forward pass
+            loss = criterion(out, yb)
+            loss.backward()  # computes gradient
+            optimizer.step()  # applies updates to weights
+            total_loss += loss.item()
+        print(f"Epoch {epoch+1:02d}: Loss = {total_loss/len(loader):.4f}")
+
+
+train_model(model, train_loader, optimizer, criterion)
+
+
+def evaluate_model(model, X, y):
+    model.eval()
+    with torch.no_grad():
+        logits = model(X)
+        preds = torch.argmax(logits, dim=1)
+        acc = (preds == y).float().mean()
+    print(f"Test Accuracy: {acc:.4f}")
+
+
+evaluate_model(model, X_test, y_test)
