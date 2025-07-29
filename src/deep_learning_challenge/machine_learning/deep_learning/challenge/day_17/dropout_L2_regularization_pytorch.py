@@ -3,6 +3,7 @@ import torch.nn as nn
 import torch.optim as optim
 
 import numpy as np
+import matplotlib.pyplot as plt
 
 from torch.utils.data import DataLoader, TensorDataset
 
@@ -68,9 +69,15 @@ optimizer = optim.Adam(model.parameters(), lr=0.01, weight_decay=1e-4)
 
 
 def train_model(model, loader, optimizer, criterion, epochs=50):
-    model.train()
+    loss_history = []
+    acc_history = []
+
     for epoch in range(epochs):
+        model.train()
         total_loss = 0
+        correct = 0
+        total = 0
+
         for xb, yb in loader:
             optimizer.zero_grad()  # reset gradients
             out = model(xb)  # forward pass
@@ -78,10 +85,22 @@ def train_model(model, loader, optimizer, criterion, epochs=50):
             loss.backward()  # computes gradient
             optimizer.step()  # applies updates to weights
             total_loss += loss.item()
-        print(f"Epoch {epoch+1:02d}: Loss = {total_loss/len(loader):.4f}")
+
+            # accuracy calculation
+            preds = torch.argmax(out, dim=1)
+            correct += (preds == yb).sum().item()
+            total += yb.size(0)
+
+    # avg loss & accuracy per epoch
+    avg_loss = total_loss / len(loader)
+    acc = correct / total
+
+    print(f"Epoch {epoch+1:02d}: Loss = {avg_loss:.4f}")
+
+    return loss_history, acc_history
 
 
-train_model(model, train_loader, optimizer, criterion)
+loss_history, acc_history = train_model(model, train_loader, optimizer, criterion)
 
 
 def evaluate_model(model, X, y):
@@ -94,3 +113,11 @@ def evaluate_model(model, X, y):
 
 
 evaluate_model(model, X_test, y_test)
+
+
+def plot_loss_vs_accuracy(loss_history, acc_history):
+    fig, (loss_ax, acc_ax) = plt.subplots(nrows=1, ncols=2, figsize=(8, 8))
+
+    loss_ax.plot(loss_history)
+
+    acc_ax.plot(acc_history)
