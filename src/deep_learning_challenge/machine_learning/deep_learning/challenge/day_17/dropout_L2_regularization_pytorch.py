@@ -127,10 +127,4 @@ def plot_loss_vs_accuracy(loss_history, acc_history):
     acc_ax.plot(acc_history)
 
 
-X_train, X_test, y_train, y_test = prepare_data()
-loader = prepare_train_data_loader(X_train, y_train)
-model, criterion, optimizer = model_criterion_optimizer()
-loss_history, acc_history = train_model(model, loader, optimizer, criterion)
 
-evaluate_model(model, X_test, y_test)
-plot_loss_vs_accuracy(loss_history, acc_history)
