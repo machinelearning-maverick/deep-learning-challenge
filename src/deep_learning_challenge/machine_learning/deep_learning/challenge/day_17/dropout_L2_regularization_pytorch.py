@@ -35,9 +35,9 @@ def prepare_data():
 
     # Convert to PyTprch
     X_train = torch.tensor(X_train, dtype=torch.float32)
-    y_train = torch.tensor(y_train, dtype=torch.float32)
+    y_train = torch.tensor(y_train, dtype=torch.long)
     X_test = torch.tensor(X_test, dtype=torch.float32)
-    y_test = torch.tensor(y_test, dtype=torch.float32)
+    y_test = torch.tensor(y_test, dtype=torch.long)
 
     return X_train, X_test, y_train, y_test
 
@@ -82,6 +82,7 @@ def train_model(model, loader, optimizer, criterion, epochs=50):
             loss = criterion(out, yb)
             loss.backward()  # computes gradient
             optimizer.step()  # applies updates to weights
+
             total_loss += loss.item()
 
             # accuracy calculation
@@ -89,11 +90,14 @@ def train_model(model, loader, optimizer, criterion, epochs=50):
             correct += (preds == yb).sum().item()
             total += yb.size(0)
 
-    # avg loss & accuracy per epoch
-    avg_loss = total_loss / len(loader)
-    acc = correct / total
+        # avg loss & accuracy per epoch
+        avg_loss = total_loss / len(loader)
+        acc = correct / total
 
-    print(f"Epoch {epoch+1:02d}: Loss = {avg_loss:.4f}")
+        loss_history.append(avg_loss)
+        acc_history.append(acc)
+
+        print(f"Epoch {epoch+1:02d}: Loss = {avg_loss:.4f}")
 
     return loss_history, acc_history
 
@@ -126,5 +130,6 @@ def plot_loss_vs_accuracy(loss_history, acc_history):
 
     acc_ax.plot(acc_history)
 
+    plt.show()
 
 
