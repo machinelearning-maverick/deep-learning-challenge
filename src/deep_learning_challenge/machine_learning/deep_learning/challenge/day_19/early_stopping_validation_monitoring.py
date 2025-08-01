@@ -1,6 +1,40 @@
 import torch
 import matplotlib.pyplot as plt
 
+from sklearn.datasets import make_classification
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+
+
+def prepare_data():
+    # Data
+    X, y = make_classification(
+        n_samples=1000,
+        n_features=20,
+        n_classes=3,
+        n_informative=15,
+        n_redundant=0,
+        random_state=42,
+    )
+
+    # Train & Test split
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.2, random_state=42
+    )
+
+    # Scale
+    scaler = StandardScaler()
+    X_train = scaler.fit_transform(X_train)
+    X_test = scaler.transform(X_test)
+
+    # Convert to PyTprch
+    X_train = torch.tensor(X_train, dtype=torch.float32)
+    y_train = torch.tensor(y_train, dtype=torch.long)
+    X_test = torch.tensor(X_test, dtype=torch.float32)
+    y_test = torch.tensor(y_test, dtype=torch.long)
+
+    return X_train, X_test, y_train, y_test
+
 
 def train_with_early_stopping(
     model, train_loader, val_data, optimizer, criterion, epochs=50, patience=5
