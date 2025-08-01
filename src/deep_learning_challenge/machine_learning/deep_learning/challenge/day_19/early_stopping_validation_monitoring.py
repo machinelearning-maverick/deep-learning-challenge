@@ -1,4 +1,5 @@
 import torch
+import matplotlib.pyplot as plt
 
 
 def train_with_early_stopping(
@@ -55,3 +56,19 @@ def train_with_early_stopping(
         model.load_state_dict(best_model_state)
 
     return train_loss_history, val_loss_history
+
+
+def plot_train_vs_val_loss(train_loss_history, val_loss_history):
+    fig, ax = plt.subplots()
+
+    ax.plot(train_loss_history, label="Train Loss")
+    ax.plot(val_loss_history, "Val Loss")
+    ax.axvline(
+        len(val_loss_history) - wait, color="red", linestyle="--", label="Early Stop"
+    )
+    ax.xlabel("Epoch")
+    ax.ylabel("Loss")
+    ax.title("Training vs Validation Loss")
+    ax.legend()
+    ax.grid(True)
+    ax.show()
