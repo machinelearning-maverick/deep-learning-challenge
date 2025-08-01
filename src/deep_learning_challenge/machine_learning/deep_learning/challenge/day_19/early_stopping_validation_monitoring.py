@@ -1,9 +1,14 @@
 import torch
+import torch.nn as nn
+import torch.optim as optim
+
 import matplotlib.pyplot as plt
 
 from sklearn.datasets import make_classification
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
+
+from torch.utils.data import DataLoader, TensorDataset
 
 
 def prepare_data():
@@ -34,6 +39,30 @@ def prepare_data():
     y_test = torch.tensor(y_test, dtype=torch.long)
 
     return X_train, X_test, y_train, y_test
+
+
+def prepare_train_data_loader(X_train, y_train):
+    train_tensor_ds = TensorDataset(X_train, y_train)
+    train_data_loader = DataLoader(train_tensor_ds, batch_size=32, shuffle=True)
+
+
+def prepare_model():
+    # Define model
+    return nn.Sequential(
+        nn.Linear(4, 10),  # input: 4 features; output: 10 neurons
+        nn.ReLU(),
+        nn.Linear(10, 3),  # input: 5  neurons; output: 2 classes
+    )
+
+
+def prepare_criterion_and_optimizer(model):
+    # CrossEntropyLoss includes softmax
+    criterion = nn.CrossEntropyLoss()
+
+    # L2 regularization is controlled via 'weight_decay' in the optimizer
+    optimizer = optim.Adam(model.parameters(), lr=0.01, weight_decay=1e-4)
+
+    return criterion, optimizer
 
 
 def train_with_early_stopping(
