@@ -41,15 +41,19 @@ def prepare_data():
     return X_train, X_test, y_train, y_test
 
 
+def prepare_val_data(X_val, y_val):
+    return (X_val, y_val)
+
+
 def prepare_train_data_loader(X_train, y_train):
     train_tensor_ds = TensorDataset(X_train, y_train)
-    train_data_loader = DataLoader(train_tensor_ds, batch_size=32, shuffle=True)
+    return DataLoader(train_tensor_ds, batch_size=32, shuffle=True)
 
 
 def prepare_model():
     # Define model
     return nn.Sequential(
-        nn.Linear(4, 10),  # input: 4 features; output: 10 neurons
+        nn.Linear(20, 10),  # input: 4 features; output: 10 neurons
         nn.ReLU(),
         nn.Linear(10, 3),  # input: 5  neurons; output: 2 classes
     )
@@ -80,6 +84,7 @@ def train_with_early_stopping(
         # Training phase
         model.train()
         total_loss = 0
+        stop_epoch = 0
 
         for xb, yb in train_loader:
             optimizer.zero_grad()  # reset gradients
@@ -104,34 +109,35 @@ def train_with_early_stopping(
         )
 
         # Early stopping check
+        wait = 0
         if val_loss < best_loss:
             best_loss = val_loss
             best_model_state = model.state_dict()
-            wait = 0
         else:
             wait += 1
             if wait >= patience:
-                print(f"Early stopping triggered at epoch {epoch+1}")
+                stop_epoch = epoch + 1
+                print(f"Early stopping triggered at epoch {stop_epoch}")
                 break
 
     # Load best model
     if best_model_state:
         model.load_state_dict(best_model_state)
 
-    return train_loss_history, val_loss_history
+    return train_loss_history, val_loss_history, stop_epoch, wait
 
 
-def plot_train_vs_val_loss(train_loss_history, val_loss_history):
-    fig, ax = plt.subplots()
+def plot_train_vs_val_loss(train_loss_history, val_loss_history, wait):
+    # fig, ax = plt.subplots()
 
-    ax.plot(train_loss_history, label="Train Loss")
-    ax.plot(val_loss_history, "Val Loss")
-    ax.axvline(
+    plt.plot(train_loss_history, label="Train Loss")
+    plt.plot(val_loss_history, label="Val Loss")
+    plt.axvline(
         len(val_loss_history) - wait, color="red", linestyle="--", label="Early Stop"
     )
-    ax.xlabel("Epoch")
-    ax.ylabel("Loss")
-    ax.title("Training vs Validation Loss")
-    ax.legend()
-    ax.grid(True)
-    ax.show()
+    plt.xlabel("Epoch")
+    plt.ylabel("Loss")
+    plt.title("Training vs Validation Loss")
+    plt.legend()
+    plt.grid(True)
+    plt.show()
