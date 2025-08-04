@@ -69,14 +69,28 @@ def create_model():
     return model
 
 
-def training_loop(
-    model,
-    optimizer,
-    train_dataset,
-    val_dataset,
-):
+def training_loop(model, optimizer, train_dataset, val_dataset, epochs=20):
     loss_fn = tf.keras.losses.CategoricalCrossentropy()
     train_acc_metric = tf.keras.metrics.CategoricalAccuracy()
     val_acc_metric = tf.keras.metrics.CategoricalAccuracy()
+
+    # Training loop
+    for epoch in range(epochs):
+        print(f"Epoch {epoch+1}/{epochs}")
+
+        # Training
+        for step, (x_batch, y_batch) in enumerate(train_dataset):
+            with tf.GradientTape() as tape:
+                logits = model(x_batch, training=True)
+                loss = loss_fn(y_batch, logits)
+            grads = tape.gradient(loss, model.trainable_weights)
+            optimizer.apply_gradients(zip(grads, model.trainable_weights))
+            train_acc_metric.update_state(y_batch, logits)
+
+        train_acc = train_acc_metric.result()
+        print(f"Train acc: {train_acc:.4f}")
+        train_acc_metric.reset_state()
+
+        
 
     pass
