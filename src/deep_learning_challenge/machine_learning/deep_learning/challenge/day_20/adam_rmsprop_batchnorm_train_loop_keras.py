@@ -91,6 +91,17 @@ def training_loop(model, optimizer, train_dataset, val_dataset, epochs=20):
         print(f"Train acc: {train_acc:.4f}")
         train_acc_metric.reset_state()
 
-        
+        # Validation
+        for x_batch_val, y_batch_val in val_dataset:
+            val_logits = model(x_batch_val, training=False)
+            val_acc_metric.update_state(y_batch_val, val_logits)
 
+        val_acc = val_acc_metric.result()
+        print(f"Validation accuracy: {val_acc:.4f}")
+        val_acc_metric.reset_state()
+
+    return train_acc, val_acc
+
+
+def plot():
     pass
