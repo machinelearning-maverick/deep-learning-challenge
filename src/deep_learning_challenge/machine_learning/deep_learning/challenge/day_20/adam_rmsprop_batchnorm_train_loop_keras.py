@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 
 import tensorflow as tf
 from tensorflow.keras import layers, models
@@ -74,18 +75,28 @@ def training_loop(model, optimizer, train_dataset, val_dataset, epochs=20):
     train_acc_metric = tf.keras.metrics.CategoricalAccuracy()
     val_acc_metric = tf.keras.metrics.CategoricalAccuracy()
 
+    train_loss_history = []
+    val_loss_history = []
+
     # Training loop
     for epoch in range(epochs):
         print(f"Epoch {epoch+1}/{epochs}")
 
         # Training
+        total_loss = 0
+
         for step, (x_batch, y_batch) in enumerate(train_dataset):
             with tf.GradientTape() as tape:
                 logits = model(x_batch, training=True)
                 loss = loss_fn(y_batch, logits)
+                total_loss += loss
+
             grads = tape.gradient(loss, model.trainable_weights)
             optimizer.apply_gradients(zip(grads, model.trainable_weights))
             train_acc_metric.update_state(y_batch, logits)
+
+        avg_train_loss = total_loss / len(train_dataset)
+        train_loss_history.append(avg_train_loss)
 
         train_acc = train_acc_metric.result()
         print(f"Train acc: {train_acc:.4f}")
@@ -97,11 +108,21 @@ def training_loop(model, optimizer, train_dataset, val_dataset, epochs=20):
             val_acc_metric.update_state(y_batch_val, val_logits)
 
         val_acc = val_acc_metric.result()
+        val_loss_history.append(val_acc)
         print(f"Validation accuracy: {val_acc:.4f}")
         val_acc_metric.reset_state()
 
-    return train_acc, val_acc
+    return train_acc, val_acc, train_loss_history, val_loss_history
 
 
-def plot():
-    pass
+def plot_train_loss_vs_val_acc(train_loss_history, val_acc_history, optimizer_name):
+    plt.plot(train_loss_history, label="Train Loss")
+    plt.plot(val_acc_history, label="Validation Accuracy")
+
+    plt.xlabel("Epoch")
+    # plt.ylabel("Loss/Accuracy")
+    plt.title(f"{optimizer_name} - Training Loss vs Validation Accuracy")
+    plt.legend()
+    plt.grid(True)
+    plt.savefig("optimizers_keras_training-loss-vs-validation-accuracy.png")
+    plt.show()

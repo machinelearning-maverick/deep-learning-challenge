@@ -5,6 +5,7 @@ from deep_learning_challenge.machine_learning.deep_learning.challenge.day_20.ada
     prepare_datasets,
     create_model,
     training_loop,
+    plot_train_loss_vs_val_acc,
 )
 
 
@@ -15,5 +16,9 @@ def test_training_loop():
 
     optimizer = tf.keras.optimizers.Adam(learning_rate=0.01)
 
-    training_loop(model, optimizer, train_dataset, val_dataset)
+    train_acc, val_acc, train_loss_history, val_loss_history = training_loop(
+        model, optimizer, train_dataset, val_dataset
+    )
+
+    plot_train_loss_vs_val_acc(train_loss_history, val_loss_history, "Adam")
     pass
