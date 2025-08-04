@@ -1,0 +1,19 @@
+import tensorflow as tf
+
+from deep_learning_challenge.machine_learning.deep_learning.challenge.day_20.adam_rmsprop_batchnorm_train_loop_keras import (
+    prepare_data,
+    prepare_datasets,
+    create_model,
+    training_loop,
+)
+
+
+def test_training_loop():
+    X_train, X_val, y_train_oh, y_val_oh = prepare_data()
+    train_dataset, val_dataset = prepare_datasets(X_train, X_val, y_train_oh, y_val_oh)
+    model = create_model()
+
+    optimizer = tf.keras.optimizers.Adam(learning_rate=0.01)
+
+    training_loop(model, optimizer, train_dataset, val_dataset)
+    pass

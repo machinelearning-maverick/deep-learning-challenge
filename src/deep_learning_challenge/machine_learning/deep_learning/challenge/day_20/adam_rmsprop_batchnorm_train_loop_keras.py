@@ -32,7 +32,25 @@ def prepare_data():
     # One-hot encode labels
     y_train_oh = tf.keras.utils.to_categorical(y_train, num_classes=3)
     y_val_oh = tf.keras.utils.to_categorical(y_val, num_classes=3)
-    pass
+
+    return X_train, X_val, y_train_oh, y_val_oh
+
+
+def prepare_datasets(X_train, X_val, y_train_oh, y_val_oh):
+    # Prepare dataset as tf.data.Dataset
+    buffer_size = 1000
+    batch_size = 32
+
+    train_dataset = (
+        tf.data.Dataset.from_tensor_slices((X_train, y_train_oh))
+        .shuffle(buffer_size)
+        .batch(batch_size)
+    )
+    val_dataset = tf.data.Dataset.from_tensor_slices((X_val, y_val_oh)).batch(
+        batch_size
+    )
+
+    return train_dataset, val_dataset
 
 
 def create_model():
@@ -49,3 +67,16 @@ def create_model():
         ]
     )
     return model
+
+
+def training_loop(
+    model,
+    optimizer,
+    train_dataset,
+    val_dataset,
+):
+    loss_fn = tf.keras.losses.CategoricalCrossentropy()
+    train_acc_metric = tf.keras.metrics.CategoricalAccuracy()
+    val_acc_metric = tf.keras.metrics.CategoricalAccuracy()
+
+    pass
