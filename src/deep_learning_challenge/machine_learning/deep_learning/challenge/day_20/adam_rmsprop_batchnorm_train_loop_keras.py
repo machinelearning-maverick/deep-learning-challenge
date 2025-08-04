@@ -77,6 +77,7 @@ def training_loop(model, optimizer, train_dataset, val_dataset, epochs=20):
 
     train_loss_history = []
     val_loss_history = []
+    val_acc_history = []
 
     # Training loop
     for epoch in range(epochs):
@@ -89,7 +90,7 @@ def training_loop(model, optimizer, train_dataset, val_dataset, epochs=20):
             with tf.GradientTape() as tape:
                 logits = model(x_batch, training=True)
                 loss = loss_fn(y_batch, logits)
-                total_loss += loss
+            total_loss += loss.numpy()
 
             grads = tape.gradient(loss, model.trainable_weights)
             optimizer.apply_gradients(zip(grads, model.trainable_weights))
@@ -103,26 +104,55 @@ def training_loop(model, optimizer, train_dataset, val_dataset, epochs=20):
         train_acc_metric.reset_state()
 
         # Validation
+        total_val_loss = 0
+
         for x_batch_val, y_batch_val in val_dataset:
             val_logits = model(x_batch_val, training=False)
+
+            val_loss = loss_fn(y_batch_val, val_logits)
+            total_val_loss += val_loss.numpy()
+
             val_acc_metric.update_state(y_batch_val, val_logits)
 
+        avg_val_loss = total_val_loss / len(val_dataset)
+        val_loss_history.append(avg_val_loss)
+
         val_acc = val_acc_metric.result()
-        val_loss_history.append(val_acc)
-        print(f"Validation accuracy: {val_acc:.4f}")
+        val_acc_history.append(val_acc.numpy())
+        print(f"Val loss: {avg_val_loss:.4f} | Val acc: {val_acc:.4f}")
         val_acc_metric.reset_state()
 
-    return train_acc, val_acc, train_loss_history, val_loss_history
+    return train_acc, val_acc, train_loss_history, val_loss_history, val_acc_history
 
 
-def plot_train_loss_vs_val_acc(train_loss_history, val_acc_history, optimizer_name):
-    plt.plot(train_loss_history, label="Train Loss")
-    plt.plot(val_acc_history, label="Validation Accuracy")
+def plot_train_loss_vs_val_acc(train_loss_history, val_loss_history, val_acc_history, optimizer_name):
+    epochs = range(1, len(train_loss_history) + 1)
 
+    plt.figure(figsize=(12, 5))
+
+    # FIXME: refactor into Object-Oriented Plotting using plt.subplots()!
+
+    # Loss subplot
+    plt.subplot(1, 2, 1)
+    plt.plot(epochs, train_loss_history, label="Train Loss")
+    plt.plot(epochs, val_loss_history, label="Val Loss")
+    plt.title(f"{optimizer_name} - Loss")
     plt.xlabel("Epoch")
-    # plt.ylabel("Loss/Accuracy")
-    plt.title(f"{optimizer_name} - Training Loss vs Validation Accuracy")
+    plt.ylabel("Loss")
     plt.legend()
     plt.grid(True)
-    plt.savefig("optimizers_keras_training-loss-vs-validation-accuracy.png")
+
+    # Accuracy subplot
+    plt.subplot(1, 2, 2)
+    plt.plot(epochs, val_acc_history, label="Val Accuracy", color="green")
+    plt.title(f"{optimizer_name} - Validation Accuracy")
+    plt.xlabel("Epoch")
+    plt.ylabel("Accuracy")
+    plt.legend()
+    plt.grid(True)
+
+    plt.tight_layout()
+    plt.savefig(
+        f"{optimizer_name.lower()}_keras_training-loss-vs-validation-accuracy.png"
+    )
     plt.show()

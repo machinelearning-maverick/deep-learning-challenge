@@ -9,16 +9,35 @@ from deep_learning_challenge.machine_learning.deep_learning.challenge.day_20.ada
 )
 
 
-def test_training_loop():
+def test_training_loop_optimizer_adam():
     X_train, X_val, y_train_oh, y_val_oh = prepare_data()
     train_dataset, val_dataset = prepare_datasets(X_train, X_val, y_train_oh, y_val_oh)
     model = create_model()
 
     optimizer = tf.keras.optimizers.Adam(learning_rate=0.01)
 
-    train_acc, val_acc, train_loss_history, val_loss_history = training_loop(
-        model, optimizer, train_dataset, val_dataset
+    train_acc, val_acc, train_loss_history, val_loss_history, val_acc_history = (
+        training_loop(model, optimizer, train_dataset, val_dataset)
     )
 
-    plot_train_loss_vs_val_acc(train_loss_history, val_loss_history, "Adam")
+    plot_train_loss_vs_val_acc(
+        train_loss_history, val_loss_history, val_acc_history, "Adam"
+    )
+    pass
+
+
+def test_training_loop_optimizer_rmsprop():
+    X_train, X_val, y_train_oh, y_val_oh = prepare_data()
+    train_dataset, val_dataset = prepare_datasets(X_train, X_val, y_train_oh, y_val_oh)
+    model = create_model()
+
+    optimizer = tf.keras.optimizers.RMSprop(learning_rate=0.01)
+
+    train_acc, val_acc, train_loss_history, val_loss_history, val_acc_history = (
+        training_loop(model, optimizer, train_dataset, val_dataset)
+    )
+
+    plot_train_loss_vs_val_acc(
+        train_loss_history, val_loss_history, val_acc_history, "RMSprop"
+    )
     pass
