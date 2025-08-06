@@ -136,3 +136,16 @@ def training_loop(
             f"Train Loss: {avg_train_loss:.4f}, Train Acc: {train_acc:.4f} | "
             f"Val Loss: {avg_val_loss:.4f}, Val Acc: {val_acc:.4f}"
         )
+
+        # Early stopping
+        if avg_val_loss < best_val_loss:
+            best_val_loss = avg_val_loss  # update best loss
+            best_model_state = model.state_dict()  # save model weights
+            wait = 0
+        else:
+            wait += 1
+            if wait >= patience:
+                print(f"Early stopping at epoch {epoch+1}")
+                break
+
+    model.load_state_dict(best_model_state)
