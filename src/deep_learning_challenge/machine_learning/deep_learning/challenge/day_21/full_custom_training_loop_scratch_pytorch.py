@@ -41,3 +41,29 @@ def prepare_dataset_dataloader(X_train, X_val, y_train, y_val, batch_size=32):
     val_data_loader = DataLoader(val_tensor_dataset, batch_size=batch_size)
 
     return train_data_loader, val_data_loader
+
+
+class MultiLayerPerceptron(nn.Module):
+    def __init__(self):
+        super().__init__()
+
+        self.net = nn.Sequential(
+            # 1st input layer (hidden); input features: 20; output neurons: 64
+            nn.Linear(20, 64),
+            # applies normalization for outputs of previous layer 64 features
+            nn.BatchNorm1d(64),
+            # applies non-linearity to introduce learning capacity
+            nn.ReLU(),
+            # randomly disables 30% of neurons during training to prevent overfitting
+            nn.Dropout(0.3),
+            # 2nd hidden layer: transforms 64 hidden units into 32 neurons
+            nn.Linear(64, 32),
+            nn.BatchNorm1d(32),
+            nn.ReLU(),
+            nn.Dropout(0.2),
+            # output layer: produces 3 outputs for 3 target classes
+            nn.Linear(32, 3),
+        )
+
+        def forward(self, x):
+            return self.net(x)
