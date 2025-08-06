@@ -6,6 +6,8 @@ import torch
 from torch import nn, optim
 from torch.utils.data import TensorDataset, DataLoader
 
+import matplotlib.pyplot as plt
+
 
 def prepare_data(test_size=0.2):
     X, y = make_classification(
@@ -65,8 +67,8 @@ class MultiLayerPerceptron(nn.Module):
             nn.Linear(32, 3),
         )
 
-        def forward(self, x):
-            return self.net(x)
+    def forward(self, x):
+        return self.net(x)
 
 
 def training_loop(
@@ -149,3 +151,29 @@ def training_loop(
                 break
 
     model.load_state_dict(best_model_state)
+
+    return train_loss_hist, val_loss_hist, val_acc_hist
+
+
+def plot_train_loss_vs_val_acc(train_loss, val_loss, val_acc):
+    epochs = range(1, len(train_loss) + 1)
+
+    fig, (train_loss_ax, val_acc_ax) = plt.subplots(nrows=1, ncols=2, figsize=(12, 5))
+
+    train_loss_ax.plot(epochs, train_loss, label="Train loss")
+    train_loss_ax.plot(epochs, val_loss, label="Validation loss")
+
+    train_loss_ax.set_title("Loss curves")
+    train_loss_ax.set(xlabel="Epoch", ylabel="Loss")
+    train_loss_ax.grid(True)
+    train_loss_ax.legend()
+
+    val_acc_ax.plot(epochs, val_acc, label="Validation accuracy", color="green")
+    
+    val_acc_ax.set_title("Validation accuracy")
+    val_acc_ax.set(xlabel="Epoch", ylabel="Accuracy")
+    val_acc_ax.grid(True)
+    val_acc_ax.legend()
+
+    fig.savefig("full-custom_training-loop_scratch-pytorch.png")
+    plt.show()
