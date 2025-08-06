@@ -67,3 +67,41 @@ class MultiLayerPerceptron(nn.Module):
 
         def forward(self, x):
             return self.net(x)
+
+
+def training_loop(model: MultiLayerPerceptron, train_loader: DataLoader):
+    criterion = nn.CrossEntropyLoss()
+    optimizer = optim.Adam(model.parameters(), lr=0.01, weight_decay=1e-4)
+    epochs = 50
+    patience = 5
+
+    train_loss_hist = []
+    val_loss_hist = []
+    val_acc_hist = []
+
+    best_val_loss = float("inf")
+    wait = 0
+
+    for epoch in range(epochs):
+        # Train
+        model.train()
+        train_loss = 0
+        correct = 0
+        total = 0
+
+        for xb, yb in train_loader:
+            optimizer.zero_grad()
+            output = model(xb)
+            loss = criterion(output, yb)
+            loss.backward()
+            optimizer.step()
+
+            train_loss += loss.item()
+            preds = output.argmax(dim=1)
+            correct += (preds == yb).sum().item()
+            total += yb.size(0)
+
+        avg_train_loss = train_loss / len(train_loader)
+        train_acc = correct / total
+        train_loss_hist.append(avg_train_loss)
+    pass
