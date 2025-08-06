@@ -69,7 +69,9 @@ class MultiLayerPerceptron(nn.Module):
             return self.net(x)
 
 
-def training_loop(model: MultiLayerPerceptron, train_loader: DataLoader):
+def training_loop(
+    model: MultiLayerPerceptron, train_loader: DataLoader, val_loader: DataLoader
+):
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=0.01, weight_decay=1e-4)
     epochs = 50
@@ -104,4 +106,33 @@ def training_loop(model: MultiLayerPerceptron, train_loader: DataLoader):
         avg_train_loss = train_loss / len(train_loader)
         train_acc = correct / total
         train_loss_hist.append(avg_train_loss)
-    pass
+
+        # Validation
+        model.eval()
+        val_loss = 0
+        correct = 0
+        total = 0
+
+        with torch.no_grad():
+            for xb, yb in val_loader:
+                output = model(xb)  # forward pass
+                loss = criterion(output, yb)  # compute validation loss
+                val_loss += loss.item()
+
+                # Calculate validation accuracy
+                preds = output.argmax(dim=1)
+                correct += (preds == yb).sum().item()
+                total += yb.size(0)
+
+        avg_val_loss = val_loss / len(val_loader)
+        val_loss_hist.append(avg_val_loss)
+
+        val_acc = correct / total
+        val_acc_hist.append(val_acc)
+
+        # Log metrics to the console
+        print(
+            f"Epoch {epoch+1:02d} | "
+            f"Train Loss: {avg_train_loss:.4f}, Train Acc: {train_acc:.4f} | "
+            f"Val Loss: {avg_val_loss:.4f}, Val Acc: {val_acc:.4f}"
+        )
