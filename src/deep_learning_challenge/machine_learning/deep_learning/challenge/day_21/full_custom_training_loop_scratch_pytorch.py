@@ -1,0 +1,179 @@
+from sklearn.datasets import make_classification
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+
+import torch
+from torch import nn, optim
+from torch.utils.data import TensorDataset, DataLoader
+
+import matplotlib.pyplot as plt
+
+
+def prepare_data(test_size=0.2):
+    X, y = make_classification(
+        n_samples=1000,
+        n_features=20,
+        n_classes=3,
+        n_informative=15,
+        n_redundant=0,
+        random_state=42,
+    )
+    X = StandardScaler().fit_transform(X)
+
+    X_train, X_val, y_train, y_val = train_test_split(
+        X, y, test_size=test_size, random_state=42
+    )
+
+    return X_train, X_val, y_train, y_val
+
+
+def prepare_dataset_dataloader(X_train, X_val, y_train, y_val, batch_size=32):
+    X_train = torch.tensor(X_train, dtype=torch.float32)
+    X_val = torch.tensor(X_val, dtype=torch.float32)
+
+    y_train = torch.tensor(y_train, dtype=torch.long)
+    y_val = torch.tensor(y_val, dtype=torch.long)
+
+    train_tensor_dataset = TensorDataset(X_train, y_train)
+    train_data_loader = DataLoader(
+        train_tensor_dataset, batch_size=batch_size, shuffle=True
+    )
+
+    val_tensor_dataset = TensorDataset(X_val, y_val)
+    val_data_loader = DataLoader(val_tensor_dataset, batch_size=batch_size)
+
+    return train_data_loader, val_data_loader
+
+
+class MultiLayerPerceptron(nn.Module):
+    def __init__(self):
+        super().__init__()
+
+        self.net = nn.Sequential(
+            # 1st input layer (hidden); input features: 20; output neurons: 64
+            nn.Linear(20, 64),
+            # applies normalization for outputs of previous layer 64 features
+            nn.BatchNorm1d(64),
+            # applies non-linearity to introduce learning capacity
+            nn.ReLU(),
+            # randomly disables 30% of neurons during training to prevent overfitting
+            nn.Dropout(0.3),
+            # 2nd hidden layer: transforms 64 hidden units into 32 neurons
+            nn.Linear(64, 32),
+            nn.BatchNorm1d(32),
+            nn.ReLU(),
+            nn.Dropout(0.2),
+            # output layer: produces 3 outputs for 3 target classes
+            nn.Linear(32, 3),
+        )
+
+    def forward(self, x):
+        return self.net(x)
+
+
+def training_loop(
+    model: MultiLayerPerceptron, train_loader: DataLoader, val_loader: DataLoader
+):
+    criterion = nn.CrossEntropyLoss()
+    optimizer = optim.Adam(model.parameters(), lr=0.01, weight_decay=1e-4)
+    epochs = 50
+    patience = 5
+
+    train_loss_hist = []
+    val_loss_hist = []
+    val_acc_hist = []
+
+    best_val_loss = float("inf")
+    wait = 0
+
+    for epoch in range(epochs):
+        # Train
+        model.train()
+        train_loss = 0
+        correct = 0
+        total = 0
+
+        for xb, yb in train_loader:
+            optimizer.zero_grad()
+            output = model(xb)
+            loss = criterion(output, yb)
+            loss.backward()
+            optimizer.step()
+
+            train_loss += loss.item()
+            preds = output.argmax(dim=1)
+            correct += (preds == yb).sum().item()
+            total += yb.size(0)
+
+        avg_train_loss = train_loss / len(train_loader)
+        train_acc = correct / total
+        train_loss_hist.append(avg_train_loss)
+
+        # Validation
+        model.eval()
+        val_loss = 0
+        correct = 0
+        total = 0
+
+        with torch.no_grad():
+            for xb, yb in val_loader:
+                output = model(xb)  # forward pass
+                loss = criterion(output, yb)  # compute validation loss
+                val_loss += loss.item()
+
+                # Calculate validation accuracy
+                preds = output.argmax(dim=1)
+                correct += (preds == yb).sum().item()
+                total += yb.size(0)
+
+        avg_val_loss = val_loss / len(val_loader)
+        val_loss_hist.append(avg_val_loss)
+
+        val_acc = correct / total
+        val_acc_hist.append(val_acc)
+
+        # Log metrics to the console
+        print(
+            f"Epoch {epoch+1:02d} | "
+            f"Train Loss: {avg_train_loss:.4f}, Train Acc: {train_acc:.4f} | "
+            f"Val Loss: {avg_val_loss:.4f}, Val Acc: {val_acc:.4f}"
+        )
+
+        # Early stopping
+        if avg_val_loss < best_val_loss:
+            best_val_loss = avg_val_loss  # update best loss
+            best_model_state = model.state_dict()  # save model weights
+            wait = 0
+        else:
+            wait += 1
+            if wait >= patience:
+                print(f"Early stopping at epoch {epoch+1}")
+                break
+
+    model.load_state_dict(best_model_state)
+
+    return train_loss_hist, val_loss_hist, val_acc_hist
+
+
+def plot_train_loss_vs_val_acc(train_loss, val_loss, val_acc):
+    epochs = range(1, len(train_loss) + 1)
+
+    fig, (train_loss_ax, val_acc_ax) = plt.subplots(nrows=1, ncols=2, figsize=(12, 5))
+
+    train_loss_ax.plot(epochs, train_loss, label="Train loss")
+    train_loss_ax.plot(epochs, val_loss, label="Validation loss")
+
+    train_loss_ax.set_title("Loss curves")
+    train_loss_ax.set(xlabel="Epoch", ylabel="Loss")
+    train_loss_ax.grid(True)
+    train_loss_ax.legend()
+
+    val_acc_ax.plot(epochs, val_acc, label="Validation accuracy", color="green")
+    
+    val_acc_ax.set_title("Validation accuracy")
+    val_acc_ax.set(xlabel="Epoch", ylabel="Accuracy")
+    val_acc_ax.grid(True)
+    val_acc_ax.legend()
+
+    fig.savefig("full-custom_training-loop_scratch-pytorch.png")
+    plt.show()
