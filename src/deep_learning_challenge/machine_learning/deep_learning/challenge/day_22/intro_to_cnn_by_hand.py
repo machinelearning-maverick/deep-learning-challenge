@@ -1,6 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+import torch
+import torch.nn as nn
+
 
 def conv2d_manual(img, kernel, stride=1, padding=0):
     # Padding
@@ -45,3 +48,18 @@ def create_plot(image, kernel, feature_map):
 
     plt.tight_layout()
     plt.show()
+
+
+def verification_with_pytorch(image, kernel):
+    # [batch=1, channel=1, h, w]
+    img_t = torch.tensor(image).unsqueeze(0).unsqueeze(0)
+    # [out_ch=1, in_ch=1, h, w]
+    kernel_t = torch.tensor(kernel).unsqueeze(0).unsqueeze(0)
+
+    conv = nn.Conv2d(1, 1, kernel_size=3, bias=False)
+    with torch.no_grad():
+        conv.weight.copy_(kernel_t)
+
+    output = conv(img_t)
+    print(f"PyTorch conv output:\n {output.squeeze()}")
+    return output
