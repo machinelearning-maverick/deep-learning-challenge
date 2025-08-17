@@ -113,8 +113,41 @@ class SimpleCNN(nn.Module):
 
 
 def train_one_epoch(model, loader, optimizer, criterion, device):
-    pass
+    model.train()
+    running_loss = 0.0
+    correct = 0
+    total = 0
+
+    for xb, yb in loader:
+        xb, yb = xb.to(device, non_blocking=True), yb.to(device, non_blocking=True)
+        optimizer.zero_grad(set_to_none=True)
+        logits = model(xb)
+        loss = criterion(logits, yb)
+        loss.backward()
+        optimizer.step()
+        #
+        running_loss += loss.item() * xb.size(0)
+        preds = logits.argmax(dim=1)
+        correct += (preds == yb).sum().item()
+        total += yb.size(0)
+
+    return running_loss / total, correct / total
 
 
 def evaluate(model, loader, criterion, device):
-    pass
+    model.eval()
+    running_loss = 0.0
+    correct = 0
+    total = 0
+
+    for xb, yb in loader:
+        xb, yb = xb.to(device, non_blocking=True), yb.to(device, non_blocking=True)
+        logits = model(xb)
+        loss = criterion(logits, yb)
+        #
+        running_loss += loss.item() * xb.size(0)
+        preds = logits.argmax(dim=1)
+        correct += (preds == yb).sum().item()
+        total += yb.size(0)
+
+    return running_loss / total, correct / total
