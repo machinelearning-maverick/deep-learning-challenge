@@ -16,66 +16,72 @@ WEIGHT_DECAY = 1e-4
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # ====================
 
-# Data transforms (normalize per dataset)
-if DATASET.lower() == "mnist":
-    in_channels = 1
-    num_classes = 10
 
-    train_transforms = transforms.Compose(
-        [
-            transforms.ToTensor(),
-            transforms.Normalize((0.1307,), (0.3081,)),  # mean, std of MNIST
-        ]
+def prepare_train_test_data_loader():
+    # Data transforms (normalize per dataset)
+    if DATASET.lower() == "mnist":
+        # in_channels = 1
+        # num_classes = 10
+
+        train_transforms = transforms.Compose(
+            [
+                transforms.ToTensor(),
+                transforms.Normalize((0.1307,), (0.3081,)),  # mean, std of MNIST
+            ]
+        )
+        test_transforms = transforms.Compose(
+            [
+                transforms.ToTensor(),
+                transforms.Normalize((0.1307,), (0.3081,)),
+            ]
+        )
+
+        train_ds = datasets.MNIST(
+            root="./data", train=True, transform=train_transforms, download=True
+        )
+        test_ds = datasets.MNIST(
+            root="./data", train=False, transform=test_transforms, download=True
+        )
+
+    elif DATASET.lower() == "cifar10":
+        # in_channels = 3
+        # num_classes = 10
+
+        train_transforms = transforms.Compose(
+            [
+                transforms.ToTensor(),
+                transforms.Normalize(
+                    (0.4914, 0.4822, 0.4465),  # CIFAR-10 mean
+                    (0.2023, 0.1994, 0.2010),  # CIFAR-10 std
+                ),
+            ]
+        )
+        test_transforms = transforms.Compose(
+            [
+                transforms.ToTensor(),
+                transforms.Normalize(
+                    (0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)
+                ),
+            ]
+        )
+
+        train_ds = datasets.CIFAR10(
+            root="./data", train=True, transform=train_transforms, download=True
+        )
+        test_ds = datasets.CIFAR10(
+            root="./data", train=False, transform=test_transforms, download=True
+        )
+    else:
+        raise ValueError("DATASET must be 'mnist' or 'cifar10'.")
+
+    train_loader = DataLoader(
+        train_ds, batch_size=BATCH_SIZE, shuffle=True, num_workers=2, pin_memory=True
     )
-    test_transforms = transforms.Compose(
-        [
-            transforms.ToTensor(),
-            transforms.Normalize((0.1307,), (0.3081,)),
-        ]
+    test_loader = DataLoader(
+        test_ds, batch_size=BATCH_SIZE, shuffle=False, num_workers=2, pin_memory=True
     )
 
-    train_ds = datasets.MNIST(
-        root="./data", train=True, transform=train_transforms, download=True
-    )
-    test_ds = datasets.MNIST(
-        root="./data", train=False, transform=test_transforms, download=True
-    )
-
-elif DATASET.lower() == "cifar10":
-    in_channels = 3
-    num_classes = 10
-
-    train_transforms = transforms.Compose(
-        [
-            transforms.ToTensor(),
-            transforms.Normalize(
-                (0.4914, 0.4822, 0.4465),  # CIFAR-10 mean
-                (0.2023, 0.1994, 0.2010),  # CIFAR-10 std
-            ),
-        ]
-    )
-    test_transforms = transforms.Compose(
-        [
-            transforms.ToTensor(),
-            transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
-        ]
-    )
-
-    train_ds = datasets.CIFAR10(
-        root="./data", train=True, transform=train_transforms, download=True
-    )
-    test_ds = datasets.CIFAR10(
-        root="./data", train=False, transform=test_transforms, download=True
-    )
-else:
-    raise ValueError("DATASET must be 'mnist' or 'cifar10'.")
-
-train_loader = DataLoader(
-    train_ds, batch_size=BATCH_SIZE, shuffle=True, num_workers=2, pin_memory=True
-)
-test_loader = DataLoader(
-    test_ds, batch_size=BATCH_SIZE, shuffle=False, num_workers=2, pin_memory=True
-)
+    return train_loader, test_loader
 
 
 # Model
@@ -110,6 +116,18 @@ class SimpleCNN(nn.Module):
         x = self.features(x)
         x = self.classifier(x)
         return x
+
+
+def prepare_model_optimizer_criterion(
+    in_channels, num_classes, device, lr, weight_decay
+):
+    model = SimpleCNN(in_channels=in_channels, num_classes=num_classes).to(
+        device=device
+    )
+    optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
+    criterion = nn.CrossEntropyLoss()
+
+    return model, optimizer, criterion
 
 
 def train_one_epoch(model, loader, optimizer, criterion, device):
